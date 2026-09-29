@@ -40,7 +40,5 @@ import java.net.Socket;
                     e.printStackTrace();
                 }
             }
-            //Something
-            System.out.print("Something");
             
     }}
