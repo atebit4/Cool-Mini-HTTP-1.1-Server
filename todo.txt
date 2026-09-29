@@ -1,0 +1,18 @@
+| Requirement | Current skeleton | What remains |
+|---|---|---|
+| TCP server | Done | Nothing major |
+| Multiple clients | Mostly done | Threading already exists |
+| Read HTTP request | Partially done | Actually parse it |
+| GET | Not done | Locate file, read bytes, send it |
+| HEAD | Not done | Same headers as GET, no file body |
+| 501 | Not done | Reject unsupported methods |
+| 404 | Not done | Detect missing file |
+| 403 | Not done | Detect traversal/outside-root paths |
+| Date header | Not done | Generate HTTP GMT date |
+| Server header | Not done | Pick a server name |
+| Content-Length | Not done | Correct byte size |
+| Last-Modified | Not done | Use file modification time |
+| If-Modified-Since | Not done | Parse and compare dates |
+| 304 | Not done | Conditional GET response |
+| Keep-alive | Not done | Process multiple requests per socket |
+| Console logging | Partially done | Print complete received requests and sent responses |
