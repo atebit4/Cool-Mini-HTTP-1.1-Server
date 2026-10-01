@@ -1,7 +1,9 @@
 
-import java.io.*;
+import java.io.BufferedInputStream;
 import java.net.Socket;
+
 import request.HttpRequests;
+import request.HttpStatus;
 import request.RequestParser;
 
     class Client implements Runnable {
@@ -19,15 +21,37 @@ import request.RequestParser;
                 BufferedInputStream socketInput = new BufferedInputStream(clientSocket1.getInputStream());
                 HttpRequests request = RequestParser.parse(socketInput);
                 if (request == null) {
-                    System.out.println("Invalid request received.");
                     return;
                 }
 
+                HttpStatus status = HttpStatus.OK; // Default to OK, you can change this based logic
+                String responseHeader = request.getVersion() + " " + status.getCode() + " " + status.getMessage() + "\r\n";
+                
                 System.out.println("Received request: " + request.getMethod() + " " + request.getPath() + " " + request.getVersion());
 
-                // Print the headers
-                System.out.println("Headers:");
-                request.getHeaders().forEach((name, value) -> System.out.println(name + ": " + value));
+
+                //old code
+                /*
+                System.out.println("Received request: " + request.getMethod() + " " + request.getPath() + " " + request.getVersion());
+
+                //need to implement GET and HEAD
+                if (request.getMethod().equals("GET")) {
+                    // Handle GET request
+                    System.out.println("Handling GET request for: " + request.getPath());
+                    // Add your GET request handling logic here
+                    request.getPath();
+
+
+                } else if (request.getMethod().equals("HEAD")) {
+                    // Handle HEAD request
+                    System.out.println("Handling HEAD request for: " + request.getPath());
+                    System.out.println("Headers:");
+                    request.getHeaders().forEach((name, value) -> System.out.println(name + ": " + value));
+                } else {
+                    System.out.println("Unsupported HTTP method: " + request.getMethod());
+                }*/
+
+
                 
 
 
