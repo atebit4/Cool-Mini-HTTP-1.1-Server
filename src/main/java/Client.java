@@ -1,6 +1,9 @@
 
 import java.io.BufferedInputStream;
+import java.io.OutputStream;
 import java.net.Socket;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import request.HttpRequests;
 import request.HttpStatus;
@@ -17,18 +20,35 @@ import request.RequestParser;
         public void run() {
             try {
                 // ###### Fill in Start ######
-
+                OutputStream socketOutput = clientSocket1.getOutputStream();
                 BufferedInputStream socketInput = new BufferedInputStream(clientSocket1.getInputStream());
                 HttpRequests request = RequestParser.parse(socketInput);
-                if (request == null) {
-                    return;
-                }
+                if (request == null) { return; }
 
-                HttpStatus status = HttpStatus.OK; // Default to OK, you can change this based logic
+                //file and path handler
+                Path file;
+                if(request.getPath().equals("/")) {
+                    file = Path.of("server_root", "index.html");
+                } else {
+                    file = Path.of("server_root", request.getPath());
+                }
+                byte[] content = Files.readAllBytes(file);
+                
+                //header stuff here
+                HttpStatus status = HttpStatus.OK; // Default to OK, change with next line logic
+                
+                //still need to add content type and length headers, but for now just send the status code and message
                 String responseHeader = request.getVersion() + " " + status.getCode() + " " + status.getMessage() + "\r\n";
                 
-                System.out.println("Received request: " + request.getMethod() + " " + request.getPath() + " " + request.getVersion());
+                //write the response header to the output stream
+                socketOutput.write(responseHeader.getBytes());
+                // Handle GET request
+                if(request.getMethod().equals("GET")) {
+                    socketOutput.write(content);
+                }
 
+                //PRINT TO CONSOLE 
+                System.out.println("Received request: " + request.getMethod() + " " + request.getPath() + " " + request.getVersion() + " " + status.getCode() + " " + status.getMessage());
 
                 //old code
                 /*
