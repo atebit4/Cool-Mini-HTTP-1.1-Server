@@ -6,7 +6,7 @@ public class MyWebServer {
     private static ServerSocket serverSocket;
     private static int port;
 
-    private static String root = "server_root";
+    private static final String root = "server_root";
 
     public static void main(String[] args) throws IOException {
         port = 8888;
@@ -17,7 +17,7 @@ public class MyWebServer {
         while (true) {
             Socket clientSocket = serverSocket.accept();
             
-            //each client gets its own thread 
+            //each client gets its own thread so multi client threading :D
             Thread clientThread = new Thread(new Client(clientSocket));
             
             clientThread.start();
