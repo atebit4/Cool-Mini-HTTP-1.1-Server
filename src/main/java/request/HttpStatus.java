@@ -1,4 +1,4 @@
-package request;
+package src.main.java.request;
 
 public enum HttpStatus {
     OK(200, "OK"),

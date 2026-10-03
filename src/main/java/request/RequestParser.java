@@ -1,4 +1,4 @@
-package request;
+package src.main.java.request;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
