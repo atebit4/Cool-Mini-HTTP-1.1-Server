@@ -5,9 +5,9 @@ import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import request.HttpRequests;
-import request.HttpStatus;
-import request.RequestParser;
+import src.main.java.request.HttpRequests;
+import src.main.java.request.HttpStatus;
+import src.main.java.request.RequestParser;
 
     class Client implements Runnable {
         private Socket clientSocket1;
@@ -52,6 +52,7 @@ import request.RequestParser;
                 }
                 // Handle other request types
                 else{
+                    status = HttpStatus.NOT_IMPLEMENTED;
                     System.out.println("501: Not Implemented");
                 }
 
