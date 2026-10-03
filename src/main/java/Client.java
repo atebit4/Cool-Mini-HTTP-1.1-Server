@@ -46,6 +46,14 @@ import request.RequestParser;
                 if(request.getMethod().equals("GET")) {
                     socketOutput.write(content);
                 }
+                // Handle HEAD request
+                else if (request.getMethod().equals("HEAD")) {
+                    System.out.println("Headers:"); //add the headers here
+                }
+                // Handle other request types
+                else{
+                    System.out.println("501: Not Implemented");
+                }
 
                 //PRINT TO CONSOLE 
                 System.out.println("Received request: " + request.getMethod() + " " + request.getPath() + " " + request.getVersion() + " " + status.getCode() + " " + status.getMessage());
