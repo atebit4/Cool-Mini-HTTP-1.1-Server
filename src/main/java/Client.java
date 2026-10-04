@@ -34,10 +34,7 @@ import src.main.java.request.RequestParser;
                     file = Path.of("server_root", request.getPath());
                 }
             */
-
-                //header stuff here
-                HttpStatus status; //default status to nothing
-            
+                HttpStatus status;
                 byte[] content;
             
                 // Handle GET request
@@ -45,12 +42,13 @@ import src.main.java.request.RequestParser;
                     status = HttpStatus.OK;
                     String file;
                     if(request.getPath().equals("/")) {
-                        file = "server_root/index.html";
+                        file = "index.html";
                     } else {
                         file = request.getPath().substring(1);
                     }
                     Path file_path = Path.of("server_root", file);
                     content = Files.readAllBytes(file_path);
+                
                 }
                 // Handle other request types
                 else{
