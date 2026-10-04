@@ -1,9 +1,106 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <title>Example</title>
-    </head>
-    <body>
-        <p>Hello this is root directory of simple HTTP server!</p>
-    </body>
+<html lang="en">
+<head>
+
+    <title>HTTP Web Server</title>
+
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+<style>
+    *{
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+    body{
+        background-color: rgb(255, 255, 255);
+        display: flex;
+        align-items: center;
+        color: black;
+        justify-content: center;
+        height: 100vh;
+    }
+    canvas{
+        display: block;
+        width: 100vw;
+        height: 100vh;
+        background-color: rgb(255, 255, 255);
+       
+    }
+    h1 {
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        z-index: 1;
+        text-align: center;
+        color: black;
+    }
+</style>
+</head>
+
+<body>
+    <h1>Hello from simple HTTP server!</h1>
+    <canvas id="canvas"></canvas>  
+</body>
+<script>
+    const canvas=document.getElementById("canvas")
+    const ctx=canvas.getContext('2d')
+    
+    function resizeCanvas(){
+        canvas.width=window.innerWidth
+        canvas.height=window.innerHeight
+    }
+    window.addEventListener('resize',resizeCanvas)
+    resizeCanvas()
+
+    const circle={
+        x:100,
+        y:100,
+        radius:40,
+        dx:5,
+        dy:4
+    }
+    function drawcircle(){
+        ctx.beginPath()
+        ctx.arc(circle.x,circle.y,circle.radius,0,Math.PI*2)
+        ctx.fillStyle="grey"
+        ctx.fill()
+
+        ctx.beginPath()
+        ctx.arc(circle.x - 12, circle.y - 12, 5, 0, Math.PI * 2)
+        ctx.fillStyle="black"
+        ctx.fill()
+
+        ctx.beginPath()
+        ctx.arc(circle.x + 12, circle.y - 12, 5, 0, Math.PI * 2)
+        ctx.fillStyle="black"
+        ctx.fill()
+
+
+        ctx.beginPath()
+        ctx.quadraticCurveTo(circle.x, circle.y + 24, circle.x + 18, circle.y + 8)
+        ctx.strokeStyle = "black"
+        ctx.lineWidth = 6
+        ctx.lineCap = "round"
+        ctx.stroke()
+        
+    }
+    drawcircle()
+    function update(){
+        ctx.clearRect(0,0,canvas.width,canvas.height)
+        drawcircle()
+        circle.x+=circle.dx
+        circle.y+=circle.dy
+        if (circle.x+circle.radius>canvas.width||circle.x-circle.radius<0){
+            circle.dx*=-1
+        }
+        if (circle.y+circle.radius>canvas.height||circle.y-circle.radius<0){
+            circle.dy*=-1
+        }
+        requestAnimationFrame(update)
+    }
+    update()
+</script>
 </html>

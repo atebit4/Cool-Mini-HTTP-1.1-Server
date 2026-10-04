@@ -38,17 +38,17 @@ import src.main.java.request.RequestParser;
                 HttpStatus status = HttpStatus.OK; // Default to OK, change with next line logic
                 
                 //still need to add content type and length headers, but for now just send the status code and message
-                String responseHeader = request.getVersion() + " " + status.getCode() + " " + status.getMessage() + "\r\n";
+                String headers = request.getVersion() + " " + status.getCode() + " " + status.getMessage() + "\r\n" + "Content-Type: text/html\r\n" + "Content-Length: " + content.length + "\r\n" + "\r\n";
                 
                 //write the response header to the output stream
-                socketOutput.write(responseHeader.getBytes());
+                socketOutput.write(headers.getBytes());
                 // Handle GET request
                 if(request.getMethod().equals("GET")) {
                     socketOutput.write(content);
                 }
                 // Handle HEAD request
                 else if (request.getMethod().equals("HEAD")) {
-                    System.out.println("Headers:"); //add the headers here
+                    System.out.println("Headers:"); // headers arehere
                 }
                 // Handle other request types
                 else{
@@ -58,32 +58,11 @@ import src.main.java.request.RequestParser;
 
                 //PRINT TO CONSOLE 
                 System.out.println("Received request: " + request.getMethod() + " " + request.getPath() + " " + request.getVersion() + " " + status.getCode() + " " + status.getMessage());
-
-                //old code
-                /*
-                System.out.println("Received request: " + request.getMethod() + " " + request.getPath() + " " + request.getVersion());
-
-                //need to implement GET and HEAD
-                if (request.getMethod().equals("GET")) {
-                    // Handle GET request
-                    System.out.println("Handling GET request for: " + request.getPath());
-                    // Add your GET request handling logic here
-                    request.getPath();
-
-
-                } else if (request.getMethod().equals("HEAD")) {
-                    // Handle HEAD request
-                    System.out.println("Handling HEAD request for: " + request.getPath());
-                    System.out.println("Headers:");
-                    request.getHeaders().forEach((name, value) -> System.out.println(name + ": " + value));
-                } else {
-                    System.out.println("Unsupported HTTP method: " + request.getMethod());
-                }*/
-
-
                 
-
-
+                System.out.println("--------------------------------------------------------\n");
+                
+                //System.out.println(socketOutput);
+                socketOutput.flush();
                 // ###### Fill in End ######
 
             } catch (Exception e) {

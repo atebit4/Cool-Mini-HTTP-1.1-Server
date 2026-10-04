@@ -1,4 +1,4 @@
-import java.io.*;
+import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
@@ -18,6 +18,7 @@ public class MyWebServer {
             Socket clientSocket = serverSocket.accept();
             
             //each client gets its own thread so multi client threading :D
+            //calls passess socket to client class 
             Thread clientThread = new Thread(new Client(clientSocket));
             
             clientThread.start();
