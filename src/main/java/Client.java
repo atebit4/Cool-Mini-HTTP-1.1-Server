@@ -25,6 +25,7 @@ import src.main.java.request.RequestParser;
                 HttpRequests request = RequestParser.parse(socketInput);
                 if (request == null) { return; }
 
+            /*
                 //file and path handler
                 Path file;
                 if(request.getPath().equals("/")) {
@@ -32,28 +33,38 @@ import src.main.java.request.RequestParser;
                 } else {
                     file = Path.of("server_root", request.getPath());
                 }
-                byte[] content = Files.readAllBytes(file);
-                
+            */
+
                 //header stuff here
-                HttpStatus status = HttpStatus.OK; // Default to OK, change with next line logic
-                
-                //still need to add content type and length headers, but for now just send the status code and message
-                String headers = request.getVersion() + " " + status.getCode() + " " + status.getMessage() + "\r\n" + "Content-Type: text/html\r\n" + "Content-Length: " + content.length + "\r\n" + "\r\n";
-                
-                //write the response header to the output stream
-                socketOutput.write(headers.getBytes());
+                HttpStatus status; //default status to nothing
+            
+                byte[] content;
+            
                 // Handle GET request
-                if(request.getMethod().equals("GET")) {
-                    socketOutput.write(content);
-                }
-                // Handle HEAD request
-                else if (request.getMethod().equals("HEAD")) {
-                    System.out.println("Headers:"); // headers arehere
+                if(request.getMethod().equals("GET") || request.getMethod().equals("HEAD")) {
+                    status = HttpStatus.OK;
+                    String file;
+                    if(request.getPath().equals("/")) {
+                        file = "server_root/index.html";
+                    } else {
+                        file = request.getPath().substring(1);
+                    }
+                    Path file_path = Path.of("server_root", file);
+                    content = Files.readAllBytes(file_path);
                 }
                 // Handle other request types
                 else{
                     status = HttpStatus.NOT_IMPLEMENTED;
                     System.out.println("501: Not Implemented");
+                    content = "".getBytes();
+                }
+                String headers = request.getVersion() + " " + status.getCode() + " " + status.getMessage() + "\r\n" + "Content-Type: text/html\r\n" + "Content-Length: " + content.length + "\r\n" + "\r\n";
+                
+
+                socketOutput.write(headers.getBytes());
+               
+               if (request.getMethod().equals("GET")) {
+                    socketOutput.write(content);
                 }
 
                 //PRINT TO CONSOLE 
