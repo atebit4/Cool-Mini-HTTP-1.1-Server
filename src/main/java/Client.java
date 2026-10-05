@@ -72,7 +72,10 @@ import request.RequestParser;
                     content = "".getBytes();
                 }
 
-                String headers = request.getVersion() + " " + status.getCode() + " " + status.getMessage() + "\r\n" + "Content-Type: text/html\r\n" + "Content-Length: " + content.length + "\r\n" + "\r\n";
+                //set the date for response
+
+
+                String headers = request.getVersion() + " " + status.getCode() + " " + status.getMessage() + "\r\n" + "Content-Type: text/html\r\n" + "Content-Length: " + content.length + "\r\n" + "Server Name: The Cool Server" + "\r\n";
                 socketOutput.write(headers.getBytes());
                
                if (request.getMethod().equals("GET")) {
