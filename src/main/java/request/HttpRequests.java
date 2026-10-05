@@ -1,4 +1,4 @@
-package src.main.java.request;
+package request;
 
 import java.util.*;
 

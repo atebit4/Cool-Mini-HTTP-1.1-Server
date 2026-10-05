@@ -5,9 +5,9 @@ import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import src.main.java.request.HttpRequests;
-import src.main.java.request.HttpStatus;
-import src.main.java.request.RequestParser;
+import request.HttpRequests;
+import request.HttpStatus;
+import request.RequestParser;
 
     class Client implements Runnable {
         private Socket clientSocket1;
