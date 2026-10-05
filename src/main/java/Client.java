@@ -4,6 +4,10 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
 import request.HttpRequests;
 import request.HttpStatus;
@@ -72,10 +76,12 @@ import request.RequestParser;
                     content = "".getBytes();
                 }
 
-                //set the date for response
+                //set the date for response header
+                ZonedDateTime datetime = ZonedDateTime.now();
+                ZonedDateTime gmt = datetime.withZoneSameInstant(ZoneId.of("GMT"));
+                DateTimeFormatter HttpDateFormat = DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm:ss z", Locale.ENGLISH);
 
-
-                String headers = request.getVersion() + " " + status.getCode() + " " + status.getMessage() + "\r\n" + "Content-Type: text/html\r\n" + "Content-Length: " + content.length + "\r\n" + "Server Name: The Cool Server" + "\r\n";
+                String headers = request.getVersion() + " " + status.getCode() + " " + status.getMessage() + "\r\n" + "Content-Type: text/html\r\n" + "Content-Length: " + content.length + "\r\n" + "Server Name: The Cool Server" + "\r\n" + "Date: " + gmt.format(HttpDateFormat);
                 socketOutput.write(headers.getBytes());
                
                if (request.getMethod().equals("GET")) {
