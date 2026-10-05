@@ -6,8 +6,6 @@ public class MyWebServer {
     private static ServerSocket serverSocket;
     private static int port;
 
-    private static final String root = "server_root";
-
     public static void main(String[] args) throws IOException {
         port = 8888;
 

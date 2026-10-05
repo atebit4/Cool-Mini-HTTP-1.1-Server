@@ -39,26 +39,40 @@ import src.main.java.request.RequestParser;
             
                 // Handle GET request
                 if(request.getMethod().equals("GET") || request.getMethod().equals("HEAD")) {
-                    status = HttpStatus.OK;
+                    //status = HttpStatus.OK;
                     String file;
                     if(request.getPath().equals("/")) {
                         file = "index.html";
                     } else {
                         file = request.getPath().substring(1);
                     }
-                    Path file_path = Path.of("server_root", file);
-                    content = Files.readAllBytes(file_path);
-                
-                }
-                // Handle other request types
-                else{
+                    Path file_path = Path.of("server_root", file).toAbsolutePath().normalize();
+                    
+                    //forbidden 
+                    // stuff like ../ or /passwd should not be allowed
+                    if(!file_path.startsWith(Path.of("server_root").toAbsolutePath().normalize())) {
+                        status = HttpStatus.FORBIDDEN;
+                        System.out.println("403: Forbidden");
+                        content = "".getBytes();
+                    } else if(!Files.exists(file_path)) { //404 not found, looking for a file that does not exist
+                        status = HttpStatus.NOT_FOUND;
+                        System.out.println("404: Not Found");
+                        content = "".getBytes();
+                    } else { //else its OK
+                        status = HttpStatus.OK;
+                        System.out.println("200: OK");
+                        content = Files.readAllBytes(file_path);
+                    }
+                    //content = Files.readAllBytes(file_path);
+                    
+                } // Handle other request types
+                else {
                     status = HttpStatus.NOT_IMPLEMENTED;
                     System.out.println("501: Not Implemented");
                     content = "".getBytes();
                 }
-                String headers = request.getVersion() + " " + status.getCode() + " " + status.getMessage() + "\r\n" + "Content-Type: text/html\r\n" + "Content-Length: " + content.length + "\r\n" + "\r\n";
-                
 
+                String headers = request.getVersion() + " " + status.getCode() + " " + status.getMessage() + "\r\n" + "Content-Type: text/html\r\n" + "Content-Length: " + content.length + "\r\n" + "\r\n";
                 socketOutput.write(headers.getBytes());
                
                if (request.getMethod().equals("GET")) {
@@ -66,7 +80,7 @@ import src.main.java.request.RequestParser;
                 }
 
                 //PRINT TO CONSOLE 
-                System.out.println("Received request: " + request.getMethod() + " " + request.getPath() + " " + request.getVersion() + " " + status.getCode() + " " + status.getMessage());
+                //System.out.println("Received request: " + request.getMethod() + " " + request.getPath() + " " + request.getVersion() + " " + status.getCode() + " " + status.getMessage());
                 
                 System.out.println("--------------------------------------------------------\n");
                 
