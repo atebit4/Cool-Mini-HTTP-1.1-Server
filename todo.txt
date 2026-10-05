@@ -11,8 +11,8 @@
 
 | Date header | Not done | Generate HTTP GMT date |
 
-| Server header | Not done | Pick a server name |
-| Content-Length | Not done | Correct byte size |
+| Server header | done | Pick a server name |
+| Content-Length | done | Correct byte size |
 
 | Last-Modified | Not done | Use file modification time |
 | If-Modified-Since | Not done | Parse and compare dates |
