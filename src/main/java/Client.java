@@ -78,10 +78,9 @@ import request.RequestParser;
 
                 //set the date for response header
                 ZonedDateTime datetime = ZonedDateTime.now();
-                ZonedDateTime gmt = datetime.withZoneSameInstant(ZoneId.of("GMT"));
-                DateTimeFormatter HttpDateFormat = DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm:ss z", Locale.ENGLISH);
+                DateTimeFormatter HttpDateFormat = DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm:ss z", Locale.ENGLISH).withZone(ZoneId.of("GMT"));
 
-                String headers = request.getVersion() + " " + status.getCode() + " " + status.getMessage() + "\r\n" + "Content-Type: text/html\r\n" + "Content-Length: " + content.length + "\r\n" + "Server Name: The Cool Server" + "\r\n" + "Date: " + gmt.format(HttpDateFormat);
+                String headers = request.getVersion() + " " + status.getCode() + " " + status.getMessage() + "\r\n" + "Content-Type: text/html\r\n" + "Content-Length: " + content.length + "\r\n" + "Server Name: The Cool Server" + "\r\n" + "Date: " + datetime.format(HttpDateFormat) + "\r\n";
                 socketOutput.write(headers.getBytes());
                
                if (request.getMethod().equals("GET")) {

@@ -8,9 +8,7 @@
 | 501 |  done | Reject unsupported methods |
 | 404 |  done | Detect missing file |
 | 403 |  done | Detect traversal/outside-root paths |
-
-| Date header | Not done | Generate HTTP GMT date |
-
+| Date header | done | Generate HTTP GMT date |
 | Server header | done | Pick a server name |
 | Content-Length | done | Correct byte size |
 
