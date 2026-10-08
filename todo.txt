@@ -11,10 +11,10 @@
 | Date header | done | Generate HTTP GMT date |
 | Server header | done | Pick a server name |
 | Content-Length | done | Correct byte size |
+| Last-Modified | done | Use file modification time |
+| Keep-alive |  done | Process multiple requests per socket |
+| Console logging | done | Received request line and headers are printed; print bodies and sent responses |
 
-| Last-Modified | Not done | Use file modification time |
 | If-Modified-Since | Not done | Parse and compare dates |
 | 304 | Not done | Conditional GET response |
-| Keep-alive | Not done | Process multiple requests per socket |
 
-| Console logging | Partially done | Received request line and headers are printed; print bodies and sent responses |

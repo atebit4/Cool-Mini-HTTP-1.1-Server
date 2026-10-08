@@ -14,7 +14,7 @@ import request.HttpStatus;
 import request.RequestParser;
 
     class Client implements Runnable {
-        private Socket clientSocket1;
+        private final Socket clientSocket1;
 
         public Client(Socket socket) {
             this.clientSocket1 = socket;
@@ -24,12 +24,9 @@ import request.RequestParser;
         public void run() {
             try {
                 // ###### Fill in Start ######
-                OutputStream socketOutput = clientSocket1.getOutputStream();
-                BufferedInputStream socketInput = new BufferedInputStream(clientSocket1.getInputStream());
-                HttpRequests request = RequestParser.parse(socketInput);
-                if (request == null) { return; }
 
-            /*
+                
+            /* OLD
                 //file and path handler
                 Path file;
                 if(request.getPath().equals("/")) {
@@ -38,63 +35,96 @@ import request.RequestParser;
                     file = Path.of("server_root", request.getPath());
                 }
             */
-                HttpStatus status;
-                byte[] content;
-            
-                // Handle GET request
-                if(request.getMethod().equals("GET") || request.getMethod().equals("HEAD")) {
-                    //status = HttpStatus.OK;
-                    String file;
-                    if(request.getPath().equals("/")) {
-                        file = "index.html";
-                    } else {
-                        file = request.getPath().substring(1);
-                    }
-                    Path file_path = Path.of("server_root", file).toAbsolutePath().normalize();
-                    
-                    //forbidden 
-                    // stuff like ../ or /passwd should not be allowed
-                    if(!file_path.startsWith(Path.of("server_root").toAbsolutePath().normalize())) {
-                        status = HttpStatus.FORBIDDEN;
-                        System.out.println("403: Forbidden");
-                        content = "".getBytes();
-                    } else if(!Files.exists(file_path)) { //404 not found, looking for a file that does not exist
-                        status = HttpStatus.NOT_FOUND;
-                        System.out.println("404: Not Found");
-                        content = "".getBytes();
-                    } else { //else its OK
-                        status = HttpStatus.OK;
-                        System.out.println("200: OK");
-                        content = Files.readAllBytes(file_path);
-                    }
-                    //content = Files.readAllBytes(file_path);
-                    
-                } // Handle other request types
-                else {
-                    status = HttpStatus.NOT_IMPLEMENTED;
-                    System.out.println("501: Not Implemented");
-                    content = "".getBytes();
-                }
-
+                OutputStream socketOutput = clientSocket1.getOutputStream();
+                BufferedInputStream socketInput = new BufferedInputStream(clientSocket1.getInputStream());
+                
                 //set the date for response header
-                ZonedDateTime datetime = ZonedDateTime.now();
                 DateTimeFormatter HttpDateFormat = DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm:ss z", Locale.ENGLISH).withZone(ZoneId.of("GMT"));
 
-                String headers = request.getVersion() + " " + status.getCode() + " " + status.getMessage() + "\r\n" + "Content-Type: text/html\r\n" + "Content-Length: " + content.length + "\r\n" + "Server Name: The Cool Server" + "\r\n" + "Date: " + datetime.format(HttpDateFormat) + "\r\n";
-                socketOutput.write(headers.getBytes());
-               
-               if (request.getMethod().equals("GET")) {
-                    socketOutput.write(content);
-                }
+                //parse the request
+                while(true){
+                   
+                    HttpRequests request = RequestParser.parse(socketInput);
+                    if (request == null) { break; }
 
-                //PRINT TO CONSOLE 
-                //System.out.println("Received request: " + request.getMethod() + " " + request.getPath() + " " + request.getVersion() + " " + status.getCode() + " " + status.getMessage());
+                    HttpStatus status;
+                    byte[] content;
+                    String LastModified = "";
+                    ZonedDateTime datetime = ZonedDateTime.now();
+
+                    // Handle GET request
+                    if(request.getMethod().equals("GET") || request.getMethod().equals("HEAD")) {
+                        //status = HttpStatus.OK;
+                        String file;
+                        if(request.getPath().equals("/")) {
+                            file = "index.html";
+                        } else {
+                            file = request.getPath().substring(1);
+                        }
+                        Path file_path = Path.of("server_root", file).toAbsolutePath().normalize();
+                        
+                        //forbidden 
+                        // stuff like ../ or /passwd should not be allowed
+                        if(!file_path.startsWith(Path.of("server_root").toAbsolutePath().normalize())) {
+                            status = HttpStatus.FORBIDDEN;
+                            System.out.println("403: Forbidden");
+                            content = "".getBytes();
+                        } else if(!Files.exists(file_path)) { //404 not found, looking for a file that does not exist
+                            status = HttpStatus.NOT_FOUND;
+                            System.out.println("404: Not Found");
+                            content = "".getBytes();
+                        } else { //else its OK
+                            status = HttpStatus.OK;
+                            System.out.println("200: OK");
+
+                            //last modified date 
+                            LastModified = HttpDateFormat.format(Files.getLastModifiedTime(file_path).toInstant());
+
+                            content = Files.readAllBytes(file_path);
+                        }
+                        //content = Files.readAllBytes(file_path);
+                        
+                    } // Handle other request types
+                    else {
+                        status = HttpStatus.NOT_IMPLEMENTED;
+                        System.out.println("501: Not Implemented");
+                        content = "".getBytes();
+                    }
+
+
+                    String headers = request.getVersion() + " " + status.getCode() + " " + status.getMessage() + "\r\n" + "Content-Type: text/html\r\n" + "Content-Length: " + content.length + "\r\n" + "Server: The Cool Server" + "\r\n" + "Date: " + datetime.format(HttpDateFormat) + "\r\n";
+
+                    //on OK 200 add last modified date to header
+                    if(status == HttpStatus.OK) {
+                        headers += "Last-Modified: " + LastModified + "\r\n" ;
+                    }
+                    //works
+                    headers += """
+                               Connection: keep-alive\r
+                               \r
+                               """;
+
+                    socketOutput.write(headers.getBytes());
                 
-                System.out.println("--------------------------------------------------------\n");
-                
-                //System.out.println(socketOutput);
-                socketOutput.flush();
-                // ###### Fill in End ######
+                    if (request.getMethod().equals("GET")) {
+                        socketOutput.write(content);
+                    }
+
+                    //PRINT TO CONSOLE 
+                    //recieve request
+                    System.out.println("Received request: " + request.getMethod() + " " + request.getPath() + " " + request.getVersion() + " " + status.getCode() + " " + status.getMessage());
+                    request.getHeaders().forEach((headerName, headerValue) -> System.out.printf("%s: %s%n", headerName, headerValue));
+                    System.out.println("\n\n");
+
+                    //send response
+                    System.out.println("Sent response: \n" + headers);
+
+                    System.out.println("--------------------------------------------------------\n");
+                    
+                    //System.out.println(socketOutput);
+                    socketOutput.flush();
+                    // ###### Fill in End ######
+                }
 
             } catch (Exception e) {
                 e.printStackTrace();
