@@ -4,9 +4,11 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.Locale;
 
 import request.HttpRequests;
@@ -63,30 +65,43 @@ import request.RequestParser;
                         }
                         Path file_path = Path.of("server_root", file).toAbsolutePath().normalize();
                         
+                        boolean forbiddenattempt = request.getPath().contains("../") || request.getPath().contains("..\\");
                         //forbidden 
                         // stuff like ../ or /passwd should not be allowed
-                        if(!file_path.startsWith(Path.of("server_root").toAbsolutePath().normalize())) {
+                        if(forbiddenattempt || !file_path.startsWith(Path.of("server_root").toAbsolutePath().normalize())) {
                             status = HttpStatus.FORBIDDEN;
                             System.out.println("403: Forbidden");
                             content = "".getBytes();
-                        } else if(!Files.exists(file_path)) { //404 not found, looking for a file that does not exist
+                        } else if(!Files.isRegularFile(file_path)) { //404 not found, looking for a file that does not exist
                             status = HttpStatus.NOT_FOUND;
                             System.out.println("404: Not Found");
                             content = "".getBytes();
-                        } else if(request.getHeaders().containsKey("If-Modified-Since")){
-                            if(LastModified.equalsIgnoreCase(request.getHeaders().get("If-Modified-Since"))){
-                                status = HttpStatus.NOT_MODIFIED;
-                                System.out.println("304 Not Modified");
-                                content = "".getBytes();
-                            }
+                       
                         } else { //else its OK
                             status = HttpStatus.OK;
                             System.out.println("200: OK");
 
                             //last modified date 
-                            LastModified = HttpDateFormat.format(Files.getLastModifiedTime(file_path).toInstant());
-
+                            Instant ILastModified = Files.getLastModifiedTime(file_path).toInstant().truncatedTo(ChronoUnit.SECONDS);
+                            LastModified = HttpDateFormat.format(ILastModified);
                             content = Files.readAllBytes(file_path);
+                            //check for 304 not modified
+                            String if304 = request.getHeader("If-Modified-Since");
+                            if(if304!=null && request.getMethod().equals("GET")) {
+                                try{
+                                    Instant reqtime = ZonedDateTime.parse(if304, HttpDateFormat).toInstant().truncatedTo(ChronoUnit.SECONDS);
+                                    if(!ILastModified.isAfter(reqtime)) {
+                                        status = HttpStatus.NOT_MODIFIED;
+                                        System.out.println("304: Not Modified");
+                                        content = "".getBytes();
+                                    }
+                                } catch (Exception e) {
+                                    //invalid leave as 200 OK
+                                }
+                            } else { //if no if-modified-since header, just read the file
+                                content = Files.readAllBytes(file_path);
+                            }
+                            //content = Files.readAllBytes(file_path);
                         }
                         //content = Files.readAllBytes(file_path);
                         
@@ -97,21 +112,26 @@ import request.RequestParser;
                         content = "".getBytes();
                     }
 
-
-                    String headers = request.getVersion() + " " + status.getCode() + " " + status.getMessage() + "\r\n" + "Content-Type: text/html\r\n" + "Content-Length: " + content.length + "\r\n" + "Server: The Cool Server" + "\r\n" + "Date: " + datetime.format(HttpDateFormat) + "\r\n";
+                    //headers for response
+                    String headers = request.getVersion() + " " + status.getCode() + " " + status.getMessage() + "\r\n" + "Content-Type: text/html\r\n" +  "Server: The Cool Server" + "\r\n" + "Date: " + datetime.format(HttpDateFormat) + "\r\n";
 
                     //on OK 200 add last modified date to header
                     if(status == HttpStatus.OK) {
                         headers += "Last-Modified: " + LastModified + "\r\n" ;
+                    } //on 304 not modified do not add content length to header
+                    if(status != HttpStatus.NOT_MODIFIED) {
+                        headers += "Content-Length: " + content.length + "\r\n";
                     }
-                    //works
+                    
+                    //keep-alive connection header to allow multiple requests on the same connection
                     headers += """
                                Connection: keep-alive\r
                                \r
                                """;
-
+                    //send response
                     socketOutput.write(headers.getBytes());
                 
+                    //send content if GET request
                     if (request.getMethod().equals("GET")) {
                         socketOutput.write(content);
                     }
@@ -127,7 +147,7 @@ import request.RequestParser;
 
                     System.out.println("--------------------------------------------------------\n");
                     
-                    //System.out.println(socketOutput);
+                    //flush output
                     socketOutput.flush();
                     // ###### Fill in End ######
                 }
