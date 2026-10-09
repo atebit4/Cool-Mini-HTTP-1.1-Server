@@ -14,7 +14,6 @@
 | Last-Modified | done | Use file modification time |
 | Keep-alive |  done | Process multiple requests per socket |
 | Console logging | done | Received request line and headers are printed; print bodies and sent responses |
-
-| If-Modified-Since | Not done | Parse and compare dates |
-| 304 | Not done | Conditional GET response |
+| If-Modified-Since | done | Parse and compare dates |
+| 304 | done | Conditional GET response |
 

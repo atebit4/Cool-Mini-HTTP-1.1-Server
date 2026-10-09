@@ -73,6 +73,12 @@ import request.RequestParser;
                             status = HttpStatus.NOT_FOUND;
                             System.out.println("404: Not Found");
                             content = "".getBytes();
+                        } else if(request.getHeaders().containsKey("If-Modified-Since")){
+                            if(LastModified.equalsIgnoreCase(request.getHeaders().get("If-Modified-Since"))){
+                                status = HttpStatus.NOT_MODIFIED;
+                                System.out.println("304 Not Modified");
+                                content = "".getBytes();
+                            }
                         } else { //else its OK
                             status = HttpStatus.OK;
                             System.out.println("200: OK");
