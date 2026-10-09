@@ -79,7 +79,6 @@ import request.RequestParser;
                        
                         } else { //else its OK
                             status = HttpStatus.OK;
-                            System.out.println("200: OK");
 
                             //last modified date 
                             Instant ILastModified = Files.getLastModifiedTime(file_path).toInstant().truncatedTo(ChronoUnit.SECONDS);
@@ -99,7 +98,9 @@ import request.RequestParser;
                                     //invalid leave as 200 OK
                                 }
                             } else { //if no if-modified-since header, just read the file
+                                System.out.println("200: OK");
                                 content = Files.readAllBytes(file_path);
+
                             }
                             //content = Files.readAllBytes(file_path);
                         }
